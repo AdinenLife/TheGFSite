@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Potato Surprise 🌸</title>
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center; /* center vertically */
+      align-items: center;
+      background: #fffbe9;
+      overflow: hidden;
+      font-family: "Comic Sans MS", cursive, sans-serif;
+      position: relative;
+    }
+
+    h1 {
+      position: absolute;
+      top: 20px;
+      font-size: 2.5rem;
+      color: #ff4d6d;
+      text-shadow: 2px 2px #fff;
+    }
+
+    /* Potato + ground wrapper */
+    .scene {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+    }
+
+    .potato {
+      position: relative;
+      width: 120px;
+      height: 150px;
+      background: #d2a679;
+      border-radius: 60% 60% 50% 50%;
+      box-shadow: inset -8px -8px 0 #b58960;
+      animation: rollIn 3s ease forwards;
+      z-index: 2;
+    }
+
+    /* Eyes */
+    .potato::before {
+      content: "";
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #000;
+      top: 40px;
+      left: 30px;
+    }
+
+    .potato::after {
+      content: "";
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #000;
+      top: 40px;
+      right: 30px;
+    }
+
+    /* Smile */
+    .smile {
+      position: absolute;
+      width: 40px;
+      height: 20px;
+      border-bottom: 4px solid #000;
+      border-radius: 50%;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    /* Arms */
+    .arm {
+      position: absolute;
+      width: 70px;
+      height: 6px;
+      background: #000;
+      top: 80px;
+    }
+
+    .arm.left {
+      left: -70px;
+      transform: rotate(-20deg);
+    }
+
+    .arm.right {
+      right: -70px;
+      transform: rotate(20deg);
+    }
+
+    /* Hands (three fingers each) */
+    .hand {
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      background: transparent;
+    }
+
+    .arm.left .hand {
+      left: -15px;
+      top: -7px;
+    }
+
+    .arm.right .hand {
+      right: -15px;
+      top: -7px;
+    }
+
+    /* Fingers */
+    .finger {
+      position: absolute;
+      width: 10px;
+      height: 4px;
+      background: #000;
+      border-radius: 2px;
+    }
+
+    /* Left hand fingers */
+    .arm.left .finger:nth-child(1) { top: 0; left: 0; transform: rotate(200deg); }
+    .arm.left .finger:nth-child(2) { top: 6px; left: 0; transform: rotate(180deg); }
+    .arm.left .finger:nth-child(3) { top: 12px; left: 0; transform: rotate(160deg); }
+
+    /* Right hand fingers */
+    .arm.right .finger:nth-child(1) { top: 0; right: 0; transform: rotate(-20deg); }
+    .arm.right .finger:nth-child(2) { top: 6px; right: 0; transform: rotate(0deg); }
+    .arm.right .finger:nth-child(3) { top: 12px; right: 0; transform: rotate(20deg); }
+
+    /* Bouquet */
+    .bouquet {
+      font-size: 110px; /* bigger bouquet */
+      opacity: 0;
+      position: absolute;
+      right: -150px;
+      top: 0px;
+      animation: appear 2s ease forwards;
+      animation-delay: 3s;
+      transform: rotate(15deg);
+    }
+
+    /* Ground */
+    .ground {
+      width: 300px;
+      height: 50px;
+      background: #7bc47f;
+      border-radius: 50%;
+      margin-top: -20px;
+      z-index: 1;
+    }
+
+    /* Falling flowers */
+    .flower {
+      position: absolute;
+      top: -50px;
+      font-size: 30px;
+      opacity: 0;
+      animation: fall 5s linear infinite;
+    }
+
+    @keyframes fall {
+      0% { transform: translateY(0) rotate(0deg); opacity: 0; }
+      10% { opacity: 1; }
+      100% { transform: translateY(110vh) rotate(360deg); opacity: 0; }
+    }
+
+    @keyframes rollIn {
+      0% { transform: translateX(-150%) rotate(-720deg); }
+      80% { transform: translateX(0) rotate(15deg); }
+      100% { transform: translateX(0) rotate(0); }
+    }
+
+    @keyframes appear {
+      from { opacity: 0; transform: scale(0.5) rotate(15deg); }
+      to { opacity: 1; transform: scale(1) rotate(15deg); }
+    }
+  </style>
+</head>
+<body>
+  <h1>🌸 Flowers for u, My Love 🌸</h1>
+
+  <!-- Flower rain container -->
+  <div id="rain"></div>
+
+  <div class="scene">
+    <div class="potato">
+      <div class="smile"></div>
+
+      <!-- Arms with hands -->
+      <div class="arm left">
+        <div class="hand">
+          <div class="finger"></div>
+          <div class="finger"></div>
+          <div class="finger"></div>
+        </div>
+      </div>
+
+      <div class="arm right">
+        <div class="hand">
+          <div class="finger"></div>
+          <div class="finger"></div>
+          <div class="finger"></div>
+        </div>
+      </div>
+
+      <!-- Bouquet -->
+      <div class="bouquet">💐</div>
+    </div>
+
+    <!-- Ground -->
+    <div class="ground"></div>
+  </div>
+
+  <script>
+    // Generate raining flowers after bouquet appears
+    setTimeout(() => {
+      const rain = document.getElementById("rain");
+      const flowers = ["🌸", "🌺", "🌷", "🌹", "💮"];
+      for (let i = 0; i < 20; i++) {
+        const f = document.createElement("div");
+        f.className = "flower";
+        f.textContent = flowers[Math.floor(Math.random() * flowers.length)];
+        f.style.left = Math.random() * 100 + "vw";
+        f.style.animationDuration = (3 + Math.random() * 3) + "s";
+        f.style.fontSize = (20 + Math.random() * 20) + "px";
+        f.style.animationDelay = Math.random() * 3 + "s";
+        rain.appendChild(f);
+      }
+    }, 5000); // start raining after bouquet shows
+  </script>
+</body>
+</html>

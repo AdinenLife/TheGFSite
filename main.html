@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>💖 The GF Site 💖</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background: linear-gradient(135deg, #ffe6eb, #ffccd5);
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* Floating hearts background */
+    .hearts {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 0;
+    }
+    .heart {
+      position: absolute;
+      font-size: 1.5rem;
+      color: rgba(255, 77, 109, 0.3);
+      animation: float 10s linear infinite;
+    }
+    @keyframes float {
+      0% { transform: translateY(100vh) scale(0.8) rotate(0deg); opacity: 0; }
+      20% { opacity: 1; }
+      100% { transform: translateY(-20vh) scale(1.2) rotate(360deg); opacity: 0; }
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 40px;
+      background: rgba(255, 255, 255, 0.35);
+      backdrop-filter: blur(8px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      z-index: 10;
+    }
+
+    .site-title {
+      font-size: 2rem;
+      font-weight: 600;
+      color: #ff4d6d;
+      text-shadow: 0 2px 6px rgba(255, 77, 109, 0.2);
+    }
+
+    .top-buttons {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      font-weight: bold;
+      font-size: 1rem;
+    }
+
+    .link-btn {
+      color: #ff4d6d;
+      text-decoration: none;
+      padding: 6px 12px;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+    }
+
+    .link-btn:hover {
+      background: #ff4d6d;
+      color: white;
+      transform: scale(1.05);
+    }
+
+    .divider {
+      width: 1px;
+      height: 20px;
+      background: #ff4d6d;
+    }
+
+    /* Centering container for note + boxes */
+    .content-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 40px;
+      padding: 40px 20px;
+      z-index: 1;
+    }
+
+    .note {
+      background-color: #ffffff;
+      padding: 25px 40px 40px 60px; 
+      border-radius: 12px;
+      max-width: 650px;
+      text-align: left;
+      font-size: 1rem;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+      line-height: 30px; 
+      color: #111;
+      position: relative;
+      border: 2px solid #000;
+
+      /* horizontal ruling lines */
+      background-image: 
+        repeating-linear-gradient(
+          to bottom,
+          #fff 0px,
+          #fff 29px,
+          #000 30px,
+          #fff 30px
+        );
+    }
+
+    .note::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 40px;
+      width: 2px;
+      height: 100%;
+      background: #000;
+    }
+
+    .boxes-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 30px;
+      padding-bottom: 40px;
+    }
+
+    .box {
+      background-color: #ffffff;
+      padding: 25px;
+      border-radius: 15px;
+      width: 280px;
+      text-align: center;
+      font-size: 1.1rem;
+      box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      cursor: pointer;
+      text-decoration: none;
+      color: #333;
+      position: relative;
+    }
+
+    .box:hover {
+      transform: translateY(-10px) scale(1.05);
+      box-shadow: 0 12px 25px rgba(0,0,0,0.3);
+      color: #ff4d6d;
+    }
+
+    /* About Creator Section */
+    .about-creator {
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(6px);
+      padding: 40px 20px;
+      text-align: center;
+      color: #333;
+      margin-top: 40px;
+    }
+
+    .about-creator h2 {
+      font-size: 1.8rem;
+      color: #ff4d6d;
+      margin-bottom: 15px;
+    }
+
+    .about-creator p {
+      max-width: 600px;
+      margin: 0 auto;
+      font-size: 1.1rem;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Floating hearts background -->
+  <div class="hearts">
+    <div class="heart" style="left:10%; animation-duration: 12s;">❤️</div>
+    <div class="heart" style="left:30%; animation-duration: 10s;">💕</div>
+    <div class="heart" style="left:50%; animation-duration: 14s;">💖</div>
+    <div class="heart" style="left:70%; animation-duration: 9s;">💞</div>
+    <div class="heart" style="left:90%; animation-duration: 11s;">💘</div>
+  </div>
+
+  <header>
+    <div class="site-title">The GF Site 💖</div>
+    <div class="top-buttons">
+      <a href="bouquet.html" class="link-btn">🌸 Bouquet</a>
+      <div class="divider"></div>
+      <a href="love.html" class="link-btn">💌 Love</a>
+      <div class="divider"></div>
+      <a href="system.html" class="link-btn">⚡ System</a>
+    </div>
+  </header>
+
+  <div class="content-wrapper">
+    <div class="note">
+      Dear Vyasa,  
+      <br><br>
+      This little corner of the internet is just for you — my way of building a tiny world filled with love, surprises, and smiles.  
+      <br><br>
+      Here you’ll find bouquets that never wilt, sweet love notes that grow with time, and a playful space where you can share your thoughts (or even tease your BF a little 😉).  
+      <br><br>
+      Every page is a piece of my heart, crafted to remind you how much you mean to me and how lucky I am to call you mine.  
+      <br><br>
+      So take your time, explore, and let this site wrap you in the love it was built with. 💖  
+      <br><br>
+      (P.S. This is just the beginning… more magic is on the way ✨)  
+    </div>
+
+    <div class="boxes-container">
+      <a href="bouquet.html" class="box">
+        🌸 <strong>Bouquet Page</strong><br>
+        A flower a day keeps the doctor away
+        <br>
+        - Said some wise man.
+      </a>
+      <a href="love.html" class="box">
+        💌 <strong>Why I Love You</strong><br>
+        Some beautiful reasons as to why I love you.
+      </a>
+      <a href="system.html" class="box">
+        ⚡ <strong>Complaint System</strong><br>
+        Yes, it actually works and the complaints don’t disappear upon reloading.
+      </a>
+    </div>
+  </div>
+
+  <!-- About Creator Section -->
+  <div class="about-creator">
+    <h2>👨‍💻 About the Creator</h2>
+    <p>
+      This site was lovingly crafted by your biggest fan (and BF 😏).  
+      Every page, animation, and detail was made with one goal — to bring a smile to your face and remind you of how special you are.  
+      Think of this little site as a digital love letter, one that keeps growing just like us. 💖
+    </p>
+  </div>
+
+</body>
+</html>
