@@ -295,46 +295,47 @@
     </div>
   </div>
 
-  <!-- Firebase + Firestore -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getFirestore, collection, addDoc, getDocs, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  <!-- =====================================================
+       ⚙️  CREDENTIALS — read from config.js (gitignored)
+       Copy config.example.js → config.js and fill in your
+       Supabase + EmailJS credentials there. Never edit them
+       directly in this file.
+       ===================================================== -->
 
-    // 🔥 Replace with your Firebase config
-    const firebaseConfig = {
-      apiKey: "AIzaSyDMv7ergOPo4xy00jsidqNQxKOA8KS7yBI",
-      authDomain: "complaint-f253f.firebaseapp.com",
-      projectId: "complaint-f253f",
-      storageBucket: "complaint-f253f.appspot.com",   // ⚠️ `.appspot.com` is correct
-      messagingSenderId: "4103921576",
-      appId: "1:4103921576:web:5a20c73543d80675f5879d"
-    };
+  <!-- Supabase JS v2 -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <!-- EmailJS -->
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <!-- Local credentials (gitignored) — MUST load before main script -->
+  <script src="config.js"></script>
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+  <script>
+    // ─── 🔑 Credentials come from config.js (gitignored) via window.ENV ─────────
+    if (!window.ENV) {
+      document.getElementById('complaintsList').innerHTML =
+        '<div class="no-complaints" style="color:red;">⚠️ <b>config.js not found.</b><br>Copy <code>config.example.js</code> → <code>config.js</code> and fill in your credentials.</div>';
+      throw new Error('window.ENV not defined — config.js is missing or not loaded.');
+    }
+    const { SUPABASE_URL, SUPABASE_ANON_KEY,
+            EMAILJS_PUBLIC_KEY, EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID,
+            NOTIFY_EMAIL } = window.ENV;
+    // ──────────────────────────────────────────────────────────────────────────
+
+    // Initialise services
+    const { createClient } = supabase;
+    const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    emailjs.init(EMAILJS_PUBLIC_KEY);
 
     let complaints = [];
 
+    // ── Stats ──────────────────────────────────────────────────────────────────
     function updateStats() {
-      const total = complaints.length;
-      const high = complaints.filter(c => c.priority === 'high').length;
-      const resolved = complaints.filter(c => c.resolved).length;
-
-      document.getElementById('totalComplaints').textContent = total;
-      document.getElementById('highPriority').textContent = high;
-      document.getElementById('resolved').textContent = resolved;
+      document.getElementById('totalComplaints').textContent = complaints.length;
+      document.getElementById('highPriority').textContent   = complaints.filter(c => c.priority === 'high').length;
+      document.getElementById('resolved').textContent       = complaints.filter(c => c.resolved).length;
     }
 
-    window.markResolved = async function(id) {
-      const complaint = complaints.find(c => c.id === id);
-      if (!complaint) return;
-
-      await updateDoc(doc(db, "complaints", id), { resolved: true });
-      complaint.resolved = true;
-      renderComplaints();
-      updateStats();
-    };
-
+    // ── Render list ────────────────────────────────────────────────────────────
     function renderComplaints() {
       const container = document.getElementById('complaintsList');
 
@@ -343,17 +344,17 @@
         return;
       }
 
-      let html = '';
-      for (const complaint of complaints) {
+      container.innerHTML = complaints.map(complaint => {
         const categoryName = complaint.category.charAt(0).toUpperCase() + complaint.category.slice(1);
-
-        html += `
+        return `
           <div class="complaint-item">
             <div class="complaint-header">
               <strong>${categoryName}</strong>
               <div>
                 <span class="priority-badge priority-${complaint.priority}-badge">${complaint.priority.toUpperCase()}</span>
-                <button onclick="markResolved('${complaint.id}')" style="margin-left: 10px; padding: 8px 15px; border: none; border-radius: 8px; cursor: pointer; background: ${complaint.resolved ? '#27ae60' : '#3498db'}; color: white; font-weight: bold;">
+                <button onclick="markResolved('${complaint.id}')"
+                  style="margin-left:10px;padding:8px 15px;border:none;border-radius:8px;cursor:pointer;
+                         background:${complaint.resolved ? '#27ae60' : '#3498db'};color:white;font-weight:bold;">
                   ${complaint.resolved ? '✅ Resolved' : '✅ Mark Resolved'}
                 </button>
               </div>
@@ -361,60 +362,128 @@
             <div class="complaint-text">
               <p><strong>Issue:</strong> ${complaint.text}</p>
               ${complaint.solution ? `<p><strong>Suggested Solution:</strong> ${complaint.solution}</p>` : ''}
-              <small style="color: #666; display: block; margin-top: 10px;">Submitted: ${complaint.date}</small>
+              <small style="color:#666;display:block;margin-top:10px;">Submitted: ${complaint.date}</small>
             </div>
-          </div>
-        `;
-      }
-      container.innerHTML = html;
+          </div>`;
+      }).join('');
     }
 
+    // ── Load complaints from Supabase ──────────────────────────────────────────
     async function loadComplaints() {
-      const querySnapshot = await getDocs(collection(db, "complaints"));
-      complaints = [];
-      querySnapshot.forEach((docSnap) => {
-        complaints.push({ id: docSnap.id, ...docSnap.data() });
-      });
+      const { data, error } = await db
+        .from('complaints')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error loading complaints:', error);
+        document.getElementById('complaintsList').innerHTML =
+          `<div class="no-complaints" style="color:red;">
+            ⚠️ Failed to load complaints: <b>${error.message}</b><br><br>
+            Make sure your Supabase URL, anon key, and Row Level Security policy are set up correctly.
+          </div>`;
+        return;
+      }
+
+      complaints = data || [];
       updateStats();
       renderComplaints();
     }
 
-    window.submitComplaint = async function() {
-      const category = document.getElementById('category').value;
-      const priority = document.getElementById('priority').value;
-      const complaintText = document.getElementById('complaint').value;
-      const solution = document.getElementById('solution').value;
+    // ── Send email via EmailJS ─────────────────────────────────────────────────
+    async function sendEmailNotification(complaint) {
+      try {
+        await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+          to_email:       NOTIFY_EMAIL,
+          category:       complaint.category.charAt(0).toUpperCase() + complaint.category.slice(1),
+          priority:       complaint.priority.toUpperCase(),
+          complaint_text: complaint.text,
+          solution:       complaint.solution || 'No suggestion provided',
+          date:           complaint.date
+        });
+        console.log('📧 Email notification sent!');
+      } catch (err) {
+        // Non-fatal — complaint is already saved; just log the email failure
+        console.warn('Email notification failed (complaint still saved):', err);
+      }
+    }
 
-      if (!category || !priority || !complaintText.trim()) {
-        alert("Please fill in all required fields.");
+    // ── Submit new complaint ───────────────────────────────────────────────────
+    window.submitComplaint = async function() {
+      const category      = document.getElementById('category').value;
+      const priority      = document.getElementById('priority').value;
+      const complaintText = document.getElementById('complaint').value.trim();
+      const solution      = document.getElementById('solution').value.trim();
+
+      if (!category || !priority || !complaintText) {
+        alert('Please fill in all required fields.');
         return;
       }
+
+      const btn = document.querySelector('.submit-btn');
+      btn.disabled = true;
+      btn.textContent = 'Submitting…';
 
       const newComplaint = {
         category,
         priority,
-        text: complaintText.trim(),
-        solution: solution.trim(),
+        text: complaintText,
+        solution,
         date: new Date().toLocaleDateString(),
         resolved: false
       };
 
-      const docRef = await addDoc(collection(db, "complaints"), newComplaint);
-      complaints.unshift({ id: docRef.id, ...newComplaint });
+      const { data, error } = await db.from('complaints').insert([newComplaint]).select().single();
+
+      if (error) {
+        console.error('Error submitting complaint:', error);
+        alert('Failed to submit complaint: ' + error.message +
+              '\n\nCheck your Supabase credentials and Row Level Security policy.');
+        btn.disabled = false;
+        btn.textContent = 'Submit Complaint 📝';
+        return;
+      }
+
+      // Add to local list and refresh UI
+      complaints.unshift(data);
       updateStats();
       renderComplaints();
 
-      document.getElementById('category').value = '';
-      document.getElementById('priority').value = '';
-      document.getElementById('complaint').value = '';
-      document.getElementById('solution').value = '';
+      // Clear form
+      ['category', 'priority', 'complaint', 'solution'].forEach(id => {
+        document.getElementById(id).value = '';
+      });
+
+      btn.disabled = false;
+      btn.textContent = 'Submit Complaint 📝';
+
+      // Send email notification (non-blocking)
+      sendEmailNotification(newComplaint);
 
       alert("Complaint submitted successfully! 💕 Let's work together to make things better!");
     };
 
-    window.addEventListener('load', () => {
-      loadComplaints();
-    });
+    // ── Mark resolved ──────────────────────────────────────────────────────────
+    window.markResolved = async function(id) {
+      const { error } = await db
+        .from('complaints')
+        .update({ resolved: true })
+        .eq('id', id);
+
+      if (error) {
+        console.error('Error updating complaint:', error);
+        alert('Failed to mark as resolved: ' + error.message);
+        return;
+      }
+
+      const complaint = complaints.find(c => c.id === id);
+      if (complaint) complaint.resolved = true;
+      renderComplaints();
+      updateStats();
+    };
+
+    // ── Bootstrap ──────────────────────────────────────────────────────────────
+    window.addEventListener('load', loadComplaints);
   </script>
 </body>
 </html>
